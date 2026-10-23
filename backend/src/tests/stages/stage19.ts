@@ -1,7 +1,7 @@
 
 import { HttpRequestTest, Test } from "../../types";
 import { buildHttpResponse } from "../../utils/http";
-import { httpRequestParser } from "../http";
+import { gzipHttpRequestParser, httpRequestParser } from "../http";
 
 const requests: HttpRequestTest[] = [
     {
@@ -23,10 +23,16 @@ Connection: close\r
             },
         },
     },
+]
+
+
+const GZIPrequests: HttpRequestTest[] = [
     {
         title: "Sample file gzip",
-        description: "This test ensures the server serves the shared sample file with gzip when the client requests compression",
-        info: "Sends a request to the server requesting for sample.txt with Accept-Encoding: gzip",
+        description:
+            "This test ensures the server serves the shared sample file with GZIP when the client requests compression",
+        info:
+            "Sends a request to the server requesting for sample.txt with Accept-Encoding: gzip",
         request: (containerName: string) => `GET /sample.txt HTTP/1.1\r
 Host: ${containerName}:8001\r
 User-Agent: TestClient/1.0\r
@@ -38,22 +44,45 @@ Connection: close\r
         expectedResponse: {
             statusCode: 200,
             headers: {
-                'content-type': 'text/plain',
-                'content-encoding': 'gzip',
-                server: 'eXpServer',
+                "content-type": "text/plain",
+                "content-encoding": "gzip",
+                server: "eXpServer",
             },
         },
     },
-]
+    
+   
+];
 
 
-export const stage19Tests: Omit<Test, 'status'>[] = requests.map(request => ({
-    title: request.title,
-    description: request.description,
-    testInput: request.info,
-    expectedBehavior: buildHttpResponse(request.expectedResponse),
-    testFunction: async (...args) => {
-        const response = await httpRequestParser(8001, request, ...args);
-        return response;
-    }
-}))
+export const stage19Tests: Omit<Test, "status">[] = [
+    ...requests.map((request) => ({
+        title: request.title,
+        description: request.description,
+        testInput: request.info,
+        expectedBehavior: buildHttpResponse(request.expectedResponse),
+
+        testFunction: async (...args) => {
+            return await httpRequestParser(
+                8001,
+                request,
+                ...args
+            );
+        },
+    })),
+
+    ...GZIPrequests.map((request) => ({
+        title: request.title,
+        description: request.description,
+        testInput: request.info,
+        expectedBehavior: buildHttpResponse(request.expectedResponse),
+
+        testFunction: async (...args) => {
+            return await gzipHttpRequestParser(
+                8001,
+                request,
+                ...args
+            );
+        },
+    })),
+];

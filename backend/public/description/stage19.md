@@ -21,7 +21,7 @@ Server: eXpServer
 ```
 
 ### Test 2: Sample file gzip
-This test ensures the server serves the shared sample file with gzip when the client requests compression
+This test ensures the server serves the shared sample file with GZIP when the client requests compression
 
 ```js
 testInput: "Sends a request to the server requesting for sample.txt with Accept-Encoding: gzip"
