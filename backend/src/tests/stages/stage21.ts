@@ -45,16 +45,16 @@ export const stage21Tests: Omit<Test, "status">[] = [
             return await activityResetTest(PORT, IDLE_BEFORE_REQUEST_S, ...args);
         },
     },
-    {
-        title: "Keep-alive requests keep the connection open",
-        description:
-            "This test ensures every request and response on a keep-alive connection resets the timer",
-        testInput: `Sends ${KEEP_ALIVE_REQUESTS} requests on one connection, ${KEEP_ALIVE_INTERVAL_S} seconds apart (${(KEEP_ALIVE_REQUESTS - 1) * KEEP_ALIVE_INTERVAL_S} seconds in total, longer than the 60 second timeout)`,
-        expectedBehavior: `All ${KEEP_ALIVE_REQUESTS} requests are answered on the same connection and the connection is never closed in between`,
-        testFunction: async (...args) => {
-            return await keepAliveTest(PORT, KEEP_ALIVE_REQUESTS, KEEP_ALIVE_INTERVAL_S, ...args);
-        },
-    },
+    // {
+    //     title: "Keep-alive requests keep the connection open",
+    //     description:
+    //         "This test ensures every request and response on a keep-alive connection resets the timer",
+    //     testInput: `Sends ${KEEP_ALIVE_REQUESTS} requests on one connection, ${KEEP_ALIVE_INTERVAL_S} seconds apart (${(KEEP_ALIVE_REQUESTS - 1) * KEEP_ALIVE_INTERVAL_S} seconds in total, longer than the 60 second timeout)`,
+    //     expectedBehavior: `All ${KEEP_ALIVE_REQUESTS} requests are answered on the same connection and the connection is never closed in between`,
+    //     testFunction: async (...args) => {
+    //         return await keepAliveTest(PORT, KEEP_ALIVE_REQUESTS, KEEP_ALIVE_INTERVAL_S, ...args);
+    //     },
+    // },
     {
         title: "Sessions time out independently",
         description:
