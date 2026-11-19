@@ -1,0 +1,75 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: expserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        # Main backend container
+        - name: backend
+          image: shivagsk121/expserver-backend:v2
+          imagePullPolicy: IfNotPresent
+
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Waiting for Docker daemon..."
+              until docker info >/dev/null 2>&1; do
+                sleep 2
+              done
+              echo "Docker daemon is ready!"
+              exec /entrypoint.sh --debug=false
+
+          ports:
+            - name: rest
+              containerPort: 6969
+            - name: socket
+              containerPort: 6970
+
+          envFrom:
+            - secretRef:
+                name: backend-secret
+
+          env:
+            - name: DOCKER_HOST
+              value: "tcp://127.0.0.1:2375"
+
+          volumeMounts:
+            - name: uploads-storage
+              mountPath: /app/uploads
+            - name: migrations-storage
+              mountPath: /app/migrations
+
+        # Docker-in-Docker sidecar
+        - name: docker-daemon
+          image: docker:29-dind
+          securityContext:
+            privileged: true
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: ""
+          args:
+            - "--host=tcp://0.0.0.0:2375"
+          volumeMounts:
+            - name: docker-storage
+              mountPath: /var/lib/docker
+
+      volumes:
+        - name: uploads-storage
+          persistentVolumeClaim:
+            claimName: uploads-storage
+        - name: migrations-storage
+          persistentVolumeClaim:
+            claimName: migrations-storage
+        - name: docker-storage
+          emptyDir: {}
